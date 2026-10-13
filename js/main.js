@@ -43,7 +43,7 @@
     introFinished = true;
     if (intro) intro.remove();
     positionInitialView();
-    if (hero) window.requestAnimationFrame(() => hero.classList.add('is-revealed'));
+    window.requestAnimationFrame(initializeTitleAnimations);
     revealInstallOptions();
   };
   const closeIntro = () => {
@@ -235,15 +235,22 @@
   window.addEventListener('scroll', updateFloatingWhatsApp, { passive: true });
 
   const sectionHeadings = document.querySelectorAll('main > section:not(.hero) h2');
+  const heroTitle = hero?.querySelector('h1');
   const entrancePatterns = [
     [-24, -30, -9, .92], [22, 27, 8, 1.05], [-30, 8, -6, .96],
     [28, -12, 7, 1.04], [-13, 31, 5, .94], [18, -27, -8, 1.03]
+  ];
+  const heroEntrancePatterns = [
+    [-35, -28, -8, .9], [34, 25, 7, 1.07], [-31, 29, -6, .94],
+    [32, -19, 8, 1.06], [-22, 30, 5, .92], [27, -30, -7, 1.04],
+    [-35, 9, 6, .96], [18, 28, -5, 1.08]
   ];
 
   const prepareHeading = (heading, headingIndex) => {
     const label = heading.innerText.replace(/\s+/g, ' ').trim();
     heading.setAttribute('aria-label', label);
     heading.classList.add('heading-chaos');
+    heading.classList.add(`heading-float-variant-${headingIndex % 3}`);
     let characterIndex = 0;
     const textNodes = [];
     const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
@@ -253,15 +260,19 @@
       const fragment = document.createDocumentFragment();
       [...textNode.textContent].forEach((character) => {
         const letter = document.createElement('span');
+        const glyph = document.createElement('span');
         const pattern = entrancePatterns[(characterIndex + headingIndex * 2) % entrancePatterns.length];
         letter.className = 'chaos-letter';
+        glyph.className = 'chaos-letter__glyph';
         letter.setAttribute('aria-hidden', 'true');
-        letter.textContent = character === ' ' ? '\u00a0' : character;
+        glyph.textContent = character === ' ' ? '\u00a0' : character;
+        letter.appendChild(glyph);
         letter.style.setProperty('--chaos-x', `${pattern[0]}px`);
         letter.style.setProperty('--chaos-y', `${pattern[1]}px`);
         letter.style.setProperty('--chaos-rotate', `${pattern[2]}deg`);
         letter.style.setProperty('--chaos-scale', pattern[3]);
         letter.style.setProperty('--chaos-delay', `${characterIndex * .045}s`);
+        letter.style.setProperty('--wave-delay', `${characterIndex * .045}s`);
         fragment.appendChild(letter);
         characterIndex += 1;
       });
@@ -269,15 +280,157 @@
     });
   };
 
-  if (!reducedMotion && 'IntersectionObserver' in window) {
-    sectionHeadings.forEach(prepareHeading);
-    const headingObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('is-formed');
-        observer.unobserve(entry.target);
+  const prepareHeroTitle = (title) => {
+    const label = title.innerText.replace(/\s+/g, ' ').trim();
+    title.setAttribute('aria-label', label);
+    title.classList.add('hero-title-lettered');
+    let characterIndex = 0;
+
+    title.querySelectorAll('.hero-title-line').forEach((line) => {
+      const textNodes = [];
+      const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT);
+      while (walker.nextNode()) textNodes.push(walker.currentNode);
+      textNodes.forEach((textNode) => {
+        const fragment = document.createDocumentFragment();
+        [...textNode.textContent].forEach((character) => {
+          const letter = document.createElement('span');
+          const glyph = document.createElement('span');
+          const pattern = heroEntrancePatterns[characterIndex % heroEntrancePatterns.length];
+          letter.className = 'hero-letter';
+          glyph.className = 'hero-letter__glyph';
+          letter.setAttribute('aria-hidden', 'true');
+          glyph.textContent = character === ' ' ? '\u00a0' : character;
+          letter.appendChild(glyph);
+          letter.style.setProperty('--hero-x', `${pattern[0]}px`);
+          letter.style.setProperty('--hero-y', `${pattern[1]}px`);
+          letter.style.setProperty('--hero-rotate', `${pattern[2]}deg`);
+          letter.style.setProperty('--hero-scale', pattern[3]);
+          letter.style.setProperty('--hero-delay', `${characterIndex * .037}s`);
+          letter.style.setProperty('--wave-delay', `${characterIndex * .045}s`);
+          fragment.appendChild(letter);
+          characterIndex += 1;
+        });
+        textNode.replaceWith(fragment);
       });
-    }, { threshold: .3, rootMargin: '0px 0px -12% 0px' });
-    sectionHeadings.forEach((heading) => headingObserver.observe(heading));
+    });
+  };
+
+  let titleAnimationsInitialized = false;
+  const floatTimers = new WeakMap();
+  const waveTimers = new WeakMap();
+
+  const clearFloatTimer = (title) => {
+    const timer = floatTimers.get(title);
+    if (timer) window.clearTimeout(timer);
+    floatTimers.delete(title);
+  };
+
+  const startFloatAfterEntrance = (title, className, delay) => {
+    clearFloatTimer(title);
+    const timer = window.setTimeout(() => {
+      title.classList.remove('is-entering');
+      title.classList.add(className);
+      floatTimers.delete(title);
+    }, delay);
+    floatTimers.set(title, timer);
+  };
+
+  const restartSectionHeading = (heading) => {
+    clearFloatTimer(heading);
+    heading.classList.remove('heading-is-floating', 'is-formed', 'is-entering', 'is-waving');
+    // A frame with the initial letter transforms guarantees a fresh transition.
+    window.requestAnimationFrame(() => {
+      heading.classList.add('is-formed', 'is-entering');
+      startFloatAfterEntrance(heading, 'heading-is-floating', 2200);
+    });
+  };
+
+  const resetSectionHeading = (heading) => {
+    clearFloatTimer(heading);
+    heading.classList.remove('heading-is-floating', 'is-formed', 'is-entering', 'is-waving');
+    const waveTimer = waveTimers.get(heading);
+    if (waveTimer) window.clearTimeout(waveTimer);
+    waveTimers.delete(heading);
+  };
+
+  const restartHeroTitle = () => {
+    if (!hero || !heroTitle) return;
+    clearFloatTimer(heroTitle);
+    heroTitle.classList.remove('hero-title-is-floating', 'is-formed', 'is-entering', 'is-waving');
+    window.requestAnimationFrame(() => {
+      hero.classList.add('is-revealed');
+      heroTitle.classList.add('is-formed', 'is-entering');
+      startFloatAfterEntrance(heroTitle, 'hero-title-is-floating', 1900);
+    });
+  };
+
+  const resetHeroTitle = () => {
+    if (!hero || !heroTitle) return;
+    clearFloatTimer(heroTitle);
+    heroTitle.classList.remove('hero-title-is-floating', 'is-formed', 'is-entering', 'is-waving');
+    const waveTimer = waveTimers.get(heroTitle);
+    if (waveTimer) window.clearTimeout(waveTimer);
+    waveTimers.delete(heroTitle);
+  };
+
+  const launchWave = (title, floatingClass, duration) => {
+    if (!title.classList.contains(floatingClass) || title.classList.contains('is-waving')) return;
+    title.classList.add('is-waving');
+    const timer = window.setTimeout(() => {
+      title.classList.remove('is-waving');
+      waveTimers.delete(title);
+    }, duration);
+    waveTimers.set(title, timer);
+  };
+
+  const bindHoverWave = (title, floatingClass, duration) => {
+    title.addEventListener('pointerenter', (event) => {
+      if (event.pointerType !== 'mouse') return;
+      launchWave(title, floatingClass, duration);
+    });
+  };
+
+  function initializeTitleAnimations() {
+    if (titleAnimationsInitialized) return;
+    titleAnimationsInitialized = true;
+
+    if (reducedMotion || !('IntersectionObserver' in window)) {
+      if (hero) hero.classList.add('is-revealed');
+      return;
+    }
+
+    sectionHeadings.forEach(prepareHeading);
+    if (heroTitle) prepareHeroTitle(heroTitle);
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      sectionHeadings.forEach((heading) => bindHoverWave(heading, 'heading-is-floating', 1250));
+      if (heroTitle) bindHoverWave(heroTitle, 'hero-title-is-floating', 1500);
+    }
+    const titleObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const { target, intersectionRatio } = entry;
+        const isHeroTitle = target === heroTitle;
+
+        // Separate enter/exit thresholds prevent tiny scroll movements from
+        // repeatedly resetting a title at the viewport edge.
+        if (intersectionRatio >= .45) {
+          if (isHeroTitle) {
+            if (!target.dataset.titleVisible) restartHeroTitle();
+          } else if (!target.dataset.titleVisible) {
+            restartSectionHeading(target);
+          }
+          target.dataset.titleVisible = 'true';
+        } else if (intersectionRatio <= .1) {
+          if (isHeroTitle) resetHeroTitle();
+          else resetSectionHeading(target);
+          delete target.dataset.titleVisible;
+        }
+      });
+    }, {
+      threshold: [.1, .45],
+      rootMargin: '-8% 0px -12% 0px'
+    });
+
+    sectionHeadings.forEach((heading) => titleObserver.observe(heading));
+    if (heroTitle) titleObserver.observe(heroTitle);
   }
 })();
