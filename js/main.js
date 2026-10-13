@@ -4,6 +4,24 @@
   const setMenu = (open) => { menuButton.setAttribute('aria-expanded', String(open)); menuButton.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú'); navigation.classList.toggle('open', open); header.classList.toggle('menu-active', open); document.body.classList.toggle('menu-open', open); };
   menuButton.addEventListener('click', () => setMenu(menuButton.getAttribute('aria-expanded') !== 'true'));
   navigation.addEventListener('click', (event) => { if (event.target.closest('a')) setMenu(false); }); document.addEventListener('keydown', (event) => { if (event.key === 'Escape') setMenu(false); }); window.addEventListener('resize', () => { if (window.innerWidth >= 900) setMenu(false); });
+  // No se solicita ningún archivo hasta que se configure un vídeo real.
+  const heroVideo = document.querySelector('.hero-video');
+  const videoToggle = document.querySelector('.video-toggle');
+  if (heroVideo && videoToggle && heroVideo.dataset.src.trim()) {
+    heroVideo.src = heroVideo.dataset.src;
+    const updateVideoToggle = () => {
+      videoToggle.textContent = heroVideo.paused ? 'Reproducir vídeo' : 'Pausar vídeo';
+      videoToggle.setAttribute('aria-pressed', String(!heroVideo.paused));
+    };
+    const playVideo = () => heroVideo.play().catch(updateVideoToggle);
+    videoToggle.hidden = false;
+    heroVideo.addEventListener('play', updateVideoToggle);
+    heroVideo.addEventListener('pause', updateVideoToggle);
+    heroVideo.addEventListener('error', () => { heroVideo.hidden = true; videoToggle.hidden = true; });
+    videoToggle.addEventListener('click', () => { if (heroVideo.paused) playVideo(); else heroVideo.pause(); });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) heroVideo.pause(); });
+    if (!reduceMotion) playVideo();
+  }
   const updateHeader = () => header.classList.toggle('scrolled', window.scrollY > 24); updateHeader(); window.addEventListener('scroll', updateHeader, { passive: true });
   document.querySelectorAll('a[href^="#"]').forEach((link) => link.addEventListener('click', (event) => { const target = document.querySelector(link.getAttribute('href')); if (!target) return; event.preventDefault(); target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }); }));
   document.getElementById('current-year').textContent = new Date().getFullYear(); const items = document.querySelectorAll('.reveal');
