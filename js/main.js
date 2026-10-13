@@ -37,6 +37,7 @@
   let introFinished = false;
   let playbackStarted = false;
   let playbackTimer;
+  let standaloneStartTimer;
   const finishIntro = () => {
     if (introFinished) return;
     introFinished = true;
@@ -49,6 +50,7 @@
     if (closed || !intro) return;
     closed = true;
     window.clearTimeout(playbackTimer);
+    window.clearTimeout(standaloneStartTimer);
     if (video) video.pause();
     intro.classList.add('is-hidden');
     intro.addEventListener('transitionend', (event) => {
@@ -56,9 +58,7 @@
     }, { once: true });
     window.setTimeout(finishIntro, 700);
   };
-  if (isStandalone) {
-    finishIntro();
-  } else if (!intro || !video || reducedMotion) {
+  if (!intro || !video || reducedMotion) {
     if (intro) closeIntro();
     else finishIntro();
   } else {
@@ -79,12 +79,17 @@
     const markPlaybackStarted = () => {
       playbackStarted = true;
       window.clearTimeout(playbackTimer);
+      window.clearTimeout(standaloneStartTimer);
+      if (isStandalone) intro.classList.add('is-video-playing');
       intro.classList.remove('is-autoplay-blocked');
       if (introFallback) introFallback.hidden = true;
     };
     const attemptPlayback = () => {
       if (closed) return Promise.resolve(false);
       setVideoAutoplayProperties();
+      if (isStandalone) {
+        try { video.currentTime = 0; } catch { /* The source may not be seekable yet. */ }
+      }
       let playPromise;
       try {
         playPromise = video.play();
@@ -98,11 +103,37 @@
         return false;
       });
     };
+    let standaloneStartScheduled = false;
     const requestPlaybackWhenReady = () => {
-      if (!playbackStarted) attemptPlayback();
+      if (playbackStarted || closed) return;
+      if (!isStandalone) {
+        attemptPlayback();
+        return;
+      }
+      if (document.visibilityState !== 'visible' || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || standaloneStartScheduled) return;
+      standaloneStartScheduled = true;
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          standaloneStartTimer = window.setTimeout(() => {
+            standaloneStartScheduled = false;
+            if (closed || playbackStarted) return;
+            if (document.visibilityState !== 'visible') {
+              requestPlaybackWhenReady();
+              return;
+            }
+            try { video.currentTime = 0; } catch { /* The source is already at its start. */ }
+            attemptPlayback();
+          }, 400);
+        });
+      });
     };
 
     setVideoAutoplayProperties();
+    if (isStandalone) {
+      video.pause();
+      try { video.currentTime = 0; } catch { /* Metadata can arrive after the source is attached. */ }
+      document.addEventListener('visibilitychange', requestPlaybackWhenReady);
+    }
     skip.addEventListener('click', () => {
       if (!intro.classList.contains('is-autoplay-blocked')) {
         closeIntro();
