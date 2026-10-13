@@ -27,9 +27,12 @@
   const intro = document.getElementById('intro');
   const video = document.getElementById('intro-video');
   const skip = document.getElementById('skip-intro');
+  const introFallback = document.getElementById('intro-fallback');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let closed = false;
   let introFinished = false;
+  let playbackStarted = false;
+  let playbackTimer;
   const finishIntro = () => {
     if (introFinished) return;
     introFinished = true;
@@ -41,9 +44,12 @@
   const closeIntro = () => {
     if (closed || !intro) return;
     closed = true;
+    window.clearTimeout(playbackTimer);
     if (video) video.pause();
     intro.classList.add('is-hidden');
-    intro.addEventListener('transitionend', finishIntro, { once: true });
+    intro.addEventListener('transitionend', (event) => {
+      if (event.target === intro) finishIntro();
+    }, { once: true });
     window.setTimeout(finishIntro, 700);
   };
   if (isStandalone) {
@@ -52,10 +58,63 @@
     if (intro) closeIntro();
     else finishIntro();
   } else {
-    skip.addEventListener('click', closeIntro);
+    const setVideoAutoplayProperties = () => {
+      // These properties must be set before every programmatic play attempt on iOS.
+      video.muted = true;
+      video.defaultMuted = true;
+      video.playsInline = true;
+      video.setAttribute('muted', '');
+      video.setAttribute('playsinline', '');
+    };
+    const showAutoplayFallback = () => {
+      if (closed || playbackStarted) return;
+      intro.classList.add('is-autoplay-blocked');
+      skip.textContent = 'Entrar';
+      if (introFallback) introFallback.hidden = false;
+    };
+    const markPlaybackStarted = () => {
+      playbackStarted = true;
+      window.clearTimeout(playbackTimer);
+      intro.classList.remove('is-autoplay-blocked');
+      if (introFallback) introFallback.hidden = true;
+    };
+    const attemptPlayback = () => {
+      if (closed) return Promise.resolve(false);
+      setVideoAutoplayProperties();
+      let playPromise;
+      try {
+        playPromise = video.play();
+      } catch {
+        showAutoplayFallback();
+        return Promise.resolve(false);
+      }
+      if (playPromise === undefined) return Promise.resolve(true);
+      return playPromise.then(() => true).catch(() => {
+        showAutoplayFallback();
+        return false;
+      });
+    };
+    const requestPlaybackWhenReady = () => {
+      if (!playbackStarted) attemptPlayback();
+    };
+
+    setVideoAutoplayProperties();
+    skip.addEventListener('click', () => {
+      if (!intro.classList.contains('is-autoplay-blocked')) {
+        closeIntro();
+        return;
+      }
+      attemptPlayback().then((started) => {
+        if (!started) closeIntro();
+      });
+    });
     video.addEventListener('ended', closeIntro, { once: true });
-    video.addEventListener('error', closeIntro, { once: true });
-    video.play().catch(closeIntro);
+    video.addEventListener('error', showAutoplayFallback, { once: true });
+    video.addEventListener('playing', markPlaybackStarted, { once: true });
+    video.addEventListener('loadeddata', requestPlaybackWhenReady, { once: true });
+    video.addEventListener('canplay', requestPlaybackWhenReady, { once: true });
+    playbackTimer = window.setTimeout(showAutoplayFallback, 4500);
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) requestPlaybackWhenReady();
   }
 
   window.addEventListener('pageshow', (event) => {
@@ -102,7 +161,7 @@
   });
   const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
   if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || isLocalhost)) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('/service-worker.js').catch(() => {}));
+    window.addEventListener('load', () => navigator.serviceWorker.register('/service-worker.js', { updateViaCache: 'none' }).catch(() => {}));
   }
 
   const navToggle = document.getElementById('nav-toggle');
