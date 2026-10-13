@@ -16,7 +16,9 @@
     });
   };
 
+  document.body.classList.add('has-js');
   if (!hasExplicitHash) positionInitialView();
+  const hero = document.getElementById('inicio');
   const installButton = document.getElementById('install-app');
   const iosInstallHint = document.getElementById('ios-install-hint');
   const closeIosInstallHint = document.getElementById('close-ios-install-hint');
@@ -33,6 +35,7 @@
     introFinished = true;
     if (intro) intro.remove();
     positionInitialView();
+    if (hero) window.requestAnimationFrame(() => hero.classList.add('is-revealed'));
     revealInstallOptions();
   };
   const closeIntro = () => {
@@ -97,9 +100,38 @@
     rememberDismissal('la-grajera-ios-install-dismissed');
     if (iosInstallHint) iosInstallHint.hidden = true;
   });
-  if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+  const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+  if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || isLocalhost)) {
     window.addEventListener('load', () => navigator.serviceWorker.register('/service-worker.js').catch(() => {}));
   }
+
+  const navToggle = document.getElementById('nav-toggle');
+  const mainNav = document.getElementById('primary-navigation');
+  const closeMobileNavigation = () => {
+    if (!navToggle || !mainNav) return;
+    navToggle.setAttribute('aria-expanded', 'false');
+    navToggle.closest('.site-header')?.classList.remove('is-menu-open');
+  };
+  if (navToggle && mainNav) {
+    navToggle.addEventListener('click', () => {
+      const isOpen = navToggle.getAttribute('aria-expanded') === 'true';
+      navToggle.setAttribute('aria-expanded', String(!isOpen));
+      navToggle.closest('.site-header')?.classList.toggle('is-menu-open', !isOpen);
+    });
+    mainNav.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMobileNavigation));
+    window.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || navToggle.getAttribute('aria-expanded') !== 'true') return;
+      closeMobileNavigation();
+      navToggle.focus();
+    });
+  }
+
+  const updateFloatingWhatsApp = () => {
+    if (!hero) return;
+    document.body.classList.toggle('hero-at-top', window.scrollY < hero.offsetHeight - 90);
+  };
+  updateFloatingWhatsApp();
+  window.addEventListener('scroll', updateFloatingWhatsApp, { passive: true });
 
   const sectionHeadings = document.querySelectorAll('main > section:not(.hero) h2');
   const entrancePatterns = [
