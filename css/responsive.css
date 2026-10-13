@@ -43,6 +43,46 @@ img{
   object-fit:contain;
 }
 
+.action-icon{
+  width:1.05rem;
+  height:1.05rem;
+  flex:0 0 auto;
+  fill:currentColor;
+}
+
+.install-app,
+.ios-install-hint{
+  position:fixed;
+  left:max(1rem, env(safe-area-inset-left));
+  z-index:31;
+  border:1px solid rgba(255,255,255,.5);
+  border-radius:.65rem;
+  background:#181b17;
+  color:#fff;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);
+}
+
+.install-app{
+  bottom:max(1rem, env(safe-area-inset-bottom));
+  min-height:44px;
+  padding:.65rem .85rem;
+  font:700 .68rem Arial,sans-serif;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  cursor:pointer;
+}
+
+.ios-install-hint{
+  bottom:max(1rem, env(safe-area-inset-bottom));
+  width:min(290px,calc(100% - 7rem));
+  padding:.75rem;
+  font-size:.78rem;
+  line-height:1.35;
+}
+
+.ios-install-hint p{margin:0 0 .5rem}
+.ios-install-hint button{border:0;padding:0;background:transparent;color:#dce0cd;font:700 .7rem Arial,sans-serif;text-decoration:underline;cursor:pointer}
+
 @media (max-width:700px){
   .hero h1{
     max-width:100%;
@@ -72,12 +112,31 @@ img{
     object-fit:contain;
   }
 
+  .hero__content{
+    padding-bottom:max(5.5rem, env(safe-area-inset-bottom));
+  }
+
   .quick-actions{
-    flex-direction:column;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(82px,1fr));
+    gap:.5rem;
+    width:100%;
   }
 
   .quick-actions a{
+    min-height:50px;
     width:100%;
     min-width:0;
+    padding:.6rem .35rem;
+    border-radius:.45rem;
+    font-size:.63rem;
+    line-height:1.1;
+    gap:.35rem;
+    white-space:nowrap;
+  }
+
+  .whatsapp-float{
+    right:max(.8rem, env(safe-area-inset-right));
+    bottom:max(.8rem, env(safe-area-inset-bottom));
   }
 }

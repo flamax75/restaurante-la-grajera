@@ -1,5 +1,25 @@
 (() => {
   'use strict';
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const initialHash = window.location.hash;
+  const hasExplicitHash = initialHash.length > 1;
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+  const positionInitialView = () => {
+    window.requestAnimationFrame(() => {
+      if (!hasExplicitHash) {
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        return;
+      }
+      const target = document.getElementById(decodeURIComponent(initialHash.slice(1)));
+      if (target) target.scrollIntoView({ block: 'start', behavior: 'auto' });
+    });
+  };
+
+  if (!hasExplicitHash) positionInitialView();
+  const installButton = document.getElementById('install-app');
+  const iosInstallHint = document.getElementById('ios-install-hint');
+  const closeIosInstallHint = document.getElementById('close-ios-install-hint');
   const year = document.getElementById('current-year');
   if (year) year.textContent = new Date().getFullYear();
   const intro = document.getElementById('intro');
@@ -7,21 +27,79 @@
   const skip = document.getElementById('skip-intro');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let closed = false;
+  let introFinished = false;
+  const finishIntro = () => {
+    if (introFinished) return;
+    introFinished = true;
+    if (intro) intro.remove();
+    positionInitialView();
+    revealInstallOptions();
+  };
   const closeIntro = () => {
     if (closed || !intro) return;
     closed = true;
     if (video) video.pause();
     intro.classList.add('is-hidden');
-    intro.addEventListener('transitionend', () => intro.remove(), { once: true });
+    intro.addEventListener('transitionend', finishIntro, { once: true });
+    window.setTimeout(finishIntro, 700);
   };
-  if (!intro || !video || reducedMotion) {
+  if (isStandalone) {
+    finishIntro();
+  } else if (!intro || !video || reducedMotion) {
     if (intro) closeIntro();
-    return;
+    else finishIntro();
+  } else {
+    skip.addEventListener('click', closeIntro);
+    video.addEventListener('ended', closeIntro, { once: true });
+    video.addEventListener('error', closeIntro, { once: true });
+    video.play().catch(closeIntro);
   }
-  skip.addEventListener('click', closeIntro);
-  video.addEventListener('ended', closeIntro, { once: true });
-  video.addEventListener('error', closeIntro, { once: true });
-  video.play().catch(closeIntro);
+
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted && !hasExplicitHash) positionInitialView();
+  });
+
+  const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  let deferredInstallPrompt;
+
+  const wasDismissed = (key) => {
+    try { return localStorage.getItem(key) === 'true'; } catch { return false; }
+  };
+  const rememberDismissal = (key) => {
+    try { localStorage.setItem(key, 'true'); } catch { /* Storage can be unavailable. */ }
+  };
+  function revealInstallOptions() {
+    if (isStandalone) return;
+    window.setTimeout(() => {
+      if (deferredInstallPrompt && installButton && !wasDismissed('la-grajera-install-dismissed')) installButton.hidden = false;
+      if (isIos && iosInstallHint && !wasDismissed('la-grajera-ios-install-dismissed')) iosInstallHint.hidden = false;
+    }, 900);
+  }
+
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    if (introFinished) revealInstallOptions();
+  });
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = undefined;
+    if (installButton) installButton.hidden = true;
+  });
+  if (installButton) installButton.addEventListener('click', async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    const choice = await deferredInstallPrompt.userChoice;
+    if (choice.outcome !== 'accepted') rememberDismissal('la-grajera-install-dismissed');
+    deferredInstallPrompt = undefined;
+    installButton.hidden = true;
+  });
+  if (closeIosInstallHint) closeIosInstallHint.addEventListener('click', () => {
+    rememberDismissal('la-grajera-ios-install-dismissed');
+    if (iosInstallHint) iosInstallHint.hidden = true;
+  });
+  if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/service-worker.js').catch(() => {}));
+  }
 
   const sectionHeadings = document.querySelectorAll('main > section:not(.hero) h2');
   const entrancePatterns = [
