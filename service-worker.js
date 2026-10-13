@@ -1,4 +1,4 @@
-/* Minimal installability worker: no runtime cache, so deployments stay fresh. */
+/* v2: Minimal installability worker: no runtime cache, so deployments stay fresh. */
 self.addEventListener('install', (event) => {
   event.waitUntil(self.skipWaiting());
 });

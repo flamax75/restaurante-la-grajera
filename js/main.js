@@ -1,7 +1,11 @@
 (() => {
   'use strict';
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-  const initialHash = window.location.hash;
+  // Installed apps always open on the cover, never at a saved section hash.
+  if (isStandalone && window.location.hash) {
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+  }
+  const initialHash = isStandalone ? '' : window.location.hash;
   const hasExplicitHash = initialHash.length > 1;
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
@@ -113,6 +117,13 @@
     video.addEventListener('playing', markPlaybackStarted, { once: true });
     video.addEventListener('loadeddata', requestPlaybackWhenReady, { once: true });
     video.addEventListener('canplay', requestPlaybackWhenReady, { once: true });
+    if (video.dataset.src) {
+      const source = document.createElement('source');
+      source.src = video.dataset.src;
+      source.type = 'video/mp4';
+      video.appendChild(source);
+      video.load();
+    }
     playbackTimer = window.setTimeout(showAutoplayFallback, 4500);
     if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) requestPlaybackWhenReady();
   }
