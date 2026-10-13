@@ -20,7 +20,11 @@
 /* Entrada y reservas: conserva el fondo actual si todavía no hay vídeo. */
 .hero-entry{min-height:100svh;padding-block:calc(var(--header) + 2rem) 2.5rem;overflow:hidden}
 .hero-entry .hero-content{padding-top:0;z-index:2}
-.hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;opacity:0;transition:opacity .55s ease}
+.hero-entry.is-intro-playing .hero-video{opacity:1}
+.hero-entry.is-intro-playing .hero-content{opacity:0;visibility:hidden;transform:translateY(1rem);pointer-events:none}
+.hero-entry.is-intro-playing .hero-shade{background:linear-gradient(90deg,rgba(34,11,16,.42),rgba(45,16,22,.2),rgba(32,12,15,.12))}
+.hero-entry .hero-content{transition:opacity .55s ease,transform .55s ease,visibility 0s linear}
 .hero-entry .hero-shade{background:linear-gradient(90deg,rgba(34,11,16,.92),rgba(45,16,22,.72),rgba(32,12,15,.45));z-index:1}
 .hero-entry h1{font-size:clamp(3.1rem,9vw,6.5rem)}
 .hero-entry .hero-logo{width:min(220px,58vw);max-height:110px}
@@ -29,15 +33,14 @@
 .entry-reservations h2{font:700 clamp(1.25rem,4vw,1.65rem)/1.2 var(--body);letter-spacing:.12em;margin-bottom:1rem}
 .reservation-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem}
 .reservation-actions .button{min-height:58px;padding:.8rem .6rem;letter-spacing:.07em;font-size:.75rem}
-.button-facebook{background:#244e84;color:#fff;flex-direction:column;gap:.15rem;font-family:var(--body)}
-.button-facebook:disabled{opacity:1;background:#354458;color:#e3e8ee;cursor:default;transform:none;border:1px solid rgba(255,255,255,.25)}
-.button-facebook span{font-size:.56rem;letter-spacing:.04em;font-weight:normal}
+.button-facebook{background:#244e84;color:#fff;font-family:var(--body)}
 .reservation-note{max-width:520px;margin:.75rem 0 0;color:#e1d7d3;font-size:.75rem;line-height:1.5}
 .entry-secondary{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;margin-top:1rem}
 .entry-secondary .text-link{color:var(--cream);border-color:rgba(255,255,255,.5)}
-.video-toggle{position:absolute;z-index:3;right:1.25rem;bottom:1rem;min-height:44px;padding:.5rem .8rem;border:1px solid rgba(255,255,255,.6);background:var(--wine-dark);color:white;font: .75rem var(--body);cursor:pointer}
+.video-toggle{position:absolute;z-index:3;right:1.25rem;bottom:1rem;min-height:44px;padding:.5rem .8rem;border:1px solid rgba(255,255,255,.6);background:rgba(41,16,21,.8);color:white;font:.75rem var(--body);cursor:pointer;letter-spacing:.06em}
 .video-toggle[hidden]{display:none}
-@media(max-width:619px){.hero-entry{padding-block:calc(var(--header) + 1.5rem) 2rem}.reservation-actions{grid-template-columns:1fr}.reservation-actions .button{min-height:52px}.hero-entry .hero-logo{max-height:90px;margin-bottom:1rem}.hero-entry .hero-type{font-size:.63rem;letter-spacing:.1em}.hero-entry .hero-lead{font-size:1.2rem}.entry-secondary{gap:.25rem 1rem}.video-toggle{position:relative;right:auto;bottom:auto;margin:1rem 1.25rem 0}.hero-entry{flex-direction:column;justify-content:center;align-items:stretch}}
+@media(max-width:619px){.hero-entry{padding-block:calc(var(--header) + 1.5rem) 2rem}.reservation-actions{grid-template-columns:1fr}.reservation-actions .button{min-height:52px}.hero-entry .hero-logo{max-height:90px;margin-bottom:1rem}.hero-entry .hero-type{font-size:.63rem;letter-spacing:.1em}.hero-entry .hero-lead{font-size:1.2rem}.entry-secondary{gap:.25rem 1rem}.video-toggle{right:1rem;bottom:1rem}.hero-entry{flex-direction:column;justify-content:center;align-items:stretch}}
+@media(prefers-reduced-motion:reduce){.hero-video{display:none}.hero-entry .hero-content{opacity:1;visibility:visible;transform:none}}
 /* Logo transparente con letras blancas */
 .brand,
 .hero-logo {

@@ -16,8 +16,8 @@
 </div></header>
 <main id="contenido">
   <section class="hero hero-entry" aria-labelledby="hero-title">
-    <!-- Añadir el MP4 en video/ y rellenar data-src para activar el vídeo. -->
-    <video class="hero-video" data-src="" poster="img/hero-la-grajera.webp" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>
+    <!-- Vídeo de entrada: se reproduce sin sonido y revela la portada al finalizar. -->
+    <video class="hero-video" data-src="video/restaurante-la-grajera.mp4" poster="img/hero-la-grajera.webp" muted playsinline preload="auto" aria-hidden="true" tabindex="-1"></video>
     <div class="hero-shade"></div>
     <div class="container hero-content">
       <img class="hero-logo" src="img/logo-la-grajera.png" alt="La Grajera">
@@ -27,16 +27,15 @@
       <div class="entry-reservations" id="reservas" aria-labelledby="entry-reservations-title">
         <h2 id="entry-reservations-title">RESERVA AQUÍ</h2>
         <div class="reservation-actions">
-          <a class="button button-whatsapp" href="https://wa.me/34639427734?text=Hola%2C%20me%20gustar%C3%ADa%20reservar%20una%20mesa%20en%20La%20Grajera." target="_blank" rel="noopener noreferrer">WhatsApp</a>
-          <a class="button button-light" href="tel:+34941120378">Llamar</a>
-          <!-- Sustituir por un enlace real y convertir en <a> al confirmar la nueva página. -->
-          <button class="button button-facebook" type="button" disabled data-provisional-url="https://www.facebook.com/LA-GRAJERA-PROVISIONAL" aria-describedby="facebook-status">Facebook <span>Próximamente</span></button>
+          <a class="button button-whatsapp" href="https://wa.me/34639427734" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          <a class="button button-light" href="tel:+34639427734">Llamar</a>
+          <a class="button button-facebook" href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">Facebook</a>
         </div>
-        <p class="reservation-note" id="facebook-status">Facebook estará disponible próximamente. Reserva por WhatsApp o teléfono.</p>
+        <p class="reservation-note">También puedes reservar por WhatsApp o teléfono.</p>
       </div>
       <div class="entry-secondary"><a class="text-link" href="#menu">Ver menú <span aria-hidden="true">→</span></a><a class="text-link" href="#restaurante">Descubre el restaurante <span aria-hidden="true">↓</span></a></div>
     </div>
-    <button class="video-toggle" type="button" hidden aria-pressed="false">Reproducir vídeo</button>
+    <button class="video-toggle" type="button" hidden>Salir de la introducción</button>
   </section>
   <section class="intro section" id="restaurante" aria-labelledby="intro-title"><div class="container intro-grid"><div class="section-heading reveal"><p class="eyebrow">Restaurante La Grajera</p><h2 id="intro-title">Una mesa para cada <em>ocasión</em></h2></div><div class="intro-copy reveal"><p class="lead">La Grajera reúne menú del día, restaurante asador y propuestas para celebrar.</p><p>Un espacio para disfrutar de una comida, organizar una comunión o consultar opciones para bodas y bautizos.</p><a class="text-link" href="#contacto">Contacta con nosotros <span>→</span></a></div></div></section>
   <section class="services section" aria-labelledby="services-title"><div class="container"><div class="section-heading centered reveal"><p class="eyebrow">La Grajera</p><h2 id="services-title">Servicios <em>principales</em></h2></div><div class="service-grid"><article class="service-card reveal"><span>01</span><h3>Menú del día</h3><p>Una propuesta para comer cada día en La Grajera.</p><a href="#menu">Consultar</a></article><article class="service-card reveal"><span>02</span><h3>Restaurante asador</h3><p>Una sección dedicada a nuestra propuesta de restaurante y asador.</p><a href="#asador">Descubrir</a></article><article class="service-card reveal"><span>03</span><h3>Celebraciones</h3><p>Espacio para celebraciones y encuentros especiales.</p><a href="#celebraciones">Consultar</a></article><article class="service-card reveal"><span>04</span><h3>Comuniones</h3><p>Información y reservas para comuniones.</p><a href="#celebraciones">Consultar</a></article><article class="service-card reveal"><span>05</span><h3>Bodas y bautizos</h3><p>Consulta disponibilidad y opciones para bodas y bautizos.</p><a href="#celebraciones">Consultar</a></article></div></div></section>
