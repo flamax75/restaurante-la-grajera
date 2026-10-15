@@ -433,4 +433,46 @@
     sectionHeadings.forEach((heading) => titleObserver.observe(heading));
     if (heroTitle) titleObserver.observe(heroTitle);
   }
+  const gallery = document.getElementById('galeria');
+  const galleryLightbox = document.getElementById('gallery-lightbox');
+  if (gallery && galleryLightbox) {
+    const galleryTriggers = [...gallery.querySelectorAll('.gallery__trigger')];
+    const galleryImage = galleryLightbox.querySelector('.gallery-lightbox__image');
+    const closeGallery = galleryLightbox.querySelector('.gallery-lightbox__close');
+    const previousGalleryImage = galleryLightbox.querySelector('.gallery-lightbox__previous');
+    const nextGalleryImage = galleryLightbox.querySelector('.gallery-lightbox__next');
+    let activeGalleryIndex = 0;
+    let galleryOpener;
+    const showGalleryImage = (index) => {
+      activeGalleryIndex = (index + galleryTriggers.length) % galleryTriggers.length;
+      const sourceImage = galleryTriggers[activeGalleryIndex].querySelector('img');
+      galleryImage.src = sourceImage.currentSrc || sourceImage.src;
+      galleryImage.alt = sourceImage.alt;
+    };
+    const openGallery = (index, opener) => {
+      galleryOpener = opener;
+      showGalleryImage(index);
+      galleryLightbox.hidden = false;
+      document.body.classList.add('is-gallery-lightbox-open');
+      closeGallery.focus();
+    };
+    const closeGalleryLightbox = () => {
+      if (galleryLightbox.hidden) return;
+      galleryLightbox.hidden = true;
+      galleryImage.removeAttribute('src');
+      document.body.classList.remove('is-gallery-lightbox-open');
+      galleryOpener?.focus();
+    };
+    galleryTriggers.forEach((trigger, index) => trigger.addEventListener('click', () => openGallery(index, trigger)));
+    closeGallery.addEventListener('click', closeGalleryLightbox);
+    previousGalleryImage.addEventListener('click', () => showGalleryImage(activeGalleryIndex - 1));
+    nextGalleryImage.addEventListener('click', () => showGalleryImage(activeGalleryIndex + 1));
+    galleryLightbox.addEventListener('click', (event) => { if (event.target === galleryLightbox) closeGalleryLightbox(); });
+    window.addEventListener('keydown', (event) => {
+      if (galleryLightbox.hidden) return;
+      if (event.key === 'Escape') closeGalleryLightbox();
+      if (event.key === 'ArrowLeft') showGalleryImage(activeGalleryIndex - 1);
+      if (event.key === 'ArrowRight') showGalleryImage(activeGalleryIndex + 1);
+    });
+  }
 })();
