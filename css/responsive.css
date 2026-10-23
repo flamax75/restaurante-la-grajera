@@ -219,6 +219,31 @@ body.has-js .hero.is-revealed .quick-actions a{opacity:1;transform:none}
   .nav-toggle{display:none}
 }
 
+/* Fixed contact actions: compact, touch-friendly, and independent of page layout. */
+.contact-float{position:fixed;right:max(1rem,env(safe-area-inset-right));bottom:max(1rem,env(safe-area-inset-bottom));z-index:40;display:grid;gap:.55rem;justify-items:end;opacity:0;transform:translateY(8px);animation:contact-float-enter .45s ease .25s forwards}
+.contact-float__action{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:46px;padding:.7rem .9rem;border:1px solid transparent;border-radius:999px;box-shadow:0 5px 18px rgba(0,0,0,.22);color:#fff;font:700 .67rem/1 Inter,Arial,sans-serif;letter-spacing:.07em;text-align:center;text-decoration:none;text-transform:uppercase;transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease}
+.contact-float__action--call{background:var(--olive-dark);border-color:rgba(255,255,255,.14)}
+.contact-float__action--facebook{background:#1877f2;border-color:rgba(255,255,255,.2)}
+.contact-float__icon{width:1.05rem;height:1.05rem;flex:0 0 auto;fill:currentColor}
+.contact-float__label-mobile{display:none}
+.contact-float__action:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.28)}
+.contact-float__action--call:hover{background:var(--olive)}
+.contact-float__action--facebook:hover{background:#166fe5}
+.contact-float__action:focus-visible{outline:2px solid #fff;outline-offset:3px}
+@keyframes contact-float-enter{to{opacity:1;transform:translateY(0)}}
+
+@media (max-width:700px){
+  .contact-float{right:max(.8rem,env(safe-area-inset-right));bottom:max(.8rem,env(safe-area-inset-bottom));gap:.45rem}
+  .contact-float__action{min-height:48px;padding:.68rem .82rem;font-size:.64rem}
+  .contact-float__label-desktop{display:none}
+  .contact-float__label-mobile{display:inline}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .contact-float{opacity:1;transform:none;animation:none}
+  .contact-float__action{transition:none}
+}
+
 @media (prefers-reduced-motion:reduce){
   .hero__image{animation:none;transform:none}
   body.has-js .hero .eyebrow,
