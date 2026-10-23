@@ -227,13 +227,6 @@
     });
   }
 
-  const updateFloatingWhatsApp = () => {
-    if (!hero) return;
-    document.body.classList.toggle('hero-at-top', window.scrollY < hero.offsetHeight - 90);
-  };
-  updateFloatingWhatsApp();
-  window.addEventListener('scroll', updateFloatingWhatsApp, { passive: true });
-
   const sectionHeadings = document.querySelectorAll('main > section:not(.hero) h2');
   const heroTitle = hero?.querySelector('h1');
   const entrancePatterns = [

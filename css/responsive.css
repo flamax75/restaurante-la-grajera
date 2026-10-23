@@ -154,10 +154,6 @@ img{
     white-space:nowrap;
   }
 
-  .whatsapp-float{
-    right:max(.8rem, env(safe-area-inset-right));
-    bottom:max(.8rem, env(safe-area-inset-bottom));
-  }
 }
 
 /* Editorial finish for the cover and its responsive navigation. */
@@ -176,8 +172,6 @@ img{
 .hero .quick-actions a{min-height:50px;border-color:rgba(255,255,255,.55);border-radius:.42rem;background:rgba(12,15,11,.36);font-family:Inter,Arial,sans-serif;transition:background .24s ease,border-color .24s ease,color .24s ease,transform .15s ease}
 .hero .quick-actions a:hover,.hero .quick-actions a:focus-visible{border-color:#fff;background:rgba(255,255,255,.94);color:var(--ink);transform:translateY(-1px)}
 .hero .quick-actions a:active{transform:scale(.98)}
-.float-icon{width:1.05rem;height:1.05rem;fill:currentColor;flex:0 0 auto}
-.whatsapp-float{display:inline-flex;align-items:center;gap:.45rem;min-height:46px}
 
 body.has-js .hero .eyebrow,
 body.has-js .hero-title-line,
@@ -219,8 +213,6 @@ body.has-js .hero.is-revealed .quick-actions a{opacity:1;transform:none}
   .hero__subtitle{max-width:25rem;margin-bottom:1.5rem;font-size:.64rem;letter-spacing:.11em}
   .hero__reservation-label{margin-bottom:.75rem;font-size:.61rem}
   .hero .quick-actions a{min-height:50px;font-size:.62rem}
-  body.hero-at-top .whatsapp-float{width:50px;height:50px;min-height:50px;justify-content:center;padding:0;border-radius:50%;font-size:0}
-  body.hero-at-top .whatsapp-float .float-icon{width:1.2rem;height:1.2rem}
 }
 
 @media (min-width:701px){
