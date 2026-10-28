@@ -156,6 +156,11 @@ img{
 
 }
 
+@media (max-width:340px){
+  .quick-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .quick-actions a:last-child{grid-column:1/-1}
+}
+
 /* Editorial finish for the cover and its responsive navigation. */
 .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .nav-toggle{display:none}
@@ -224,11 +229,13 @@ body.has-js .hero.is-revealed .quick-actions a{opacity:1;transform:none}
 .contact-float__action{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:46px;padding:.7rem .9rem;border:1px solid transparent;border-radius:999px;box-shadow:0 5px 18px rgba(0,0,0,.22);color:#fff;font:700 .67rem/1 Inter,Arial,sans-serif;letter-spacing:.07em;text-align:center;text-decoration:none;text-transform:uppercase;transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease}
 .contact-float__action--call{background:var(--olive-dark);border-color:rgba(255,255,255,.14)}
 .contact-float__action--facebook{background:#1877f2;border-color:rgba(255,255,255,.2)}
+.contact-float__action--instagram{background:#c13584;border-color:rgba(255,255,255,.2)}
 .contact-float__icon{width:1.05rem;height:1.05rem;flex:0 0 auto;fill:currentColor}
 .contact-float__label-mobile{display:none}
 .contact-float__action:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.28)}
 .contact-float__action--call:hover{background:var(--olive)}
 .contact-float__action--facebook:hover{background:#166fe5}
+.contact-float__action--instagram:hover{background:#a92f73}
 .contact-float__action:focus-visible{outline:2px solid #fff;outline-offset:3px}
 @keyframes contact-float-enter{to{opacity:1;transform:translateY(0)}}
 
